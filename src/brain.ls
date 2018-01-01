@@ -4,15 +4,15 @@ config = require(\config)
 { get-channel, nuke, print-events, print-splash } = require('./routines')
 client = new (require(\discord.js)).Client()
 
-# load data.
+# data operations (globals; load-state; save-save).
+global.reservation-tokens = {}
 (_, file) <- read-file("#__dirname/../data/events.json")
 global.state = if file? then JSON.parse(file) else []
+global.save-state = ->
 
 # log in and wait.
 client.login(config.get(\token))
 <- client.on(\ready)
-
-# set up reactions.
 
 # ensure initial channel status.
 channel = get-channel(client)
