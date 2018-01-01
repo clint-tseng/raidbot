@@ -9,5 +9,9 @@ wait = (interval, f_) --> set-timeout(f_, interval * 1000)
 
 retrying = (f_, tries = 2) -> f_().catch(-> retrying(f_, tries - 1) if tries isnt 0)
 
-module.exports = { consume, wait, retrying }
+in-parallel = (promise, f) ->
+  promise.then(f)
+  promise
+
+module.exports = { consume, wait, retrying, in-parallel }
 
