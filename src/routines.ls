@@ -1,7 +1,7 @@
 config = require(\config)
 { DateTime } = require(\luxon)
 Discord = require(\discord.js)
-{ map } = require(\prelude-ls)
+{ any, map, find-index } = require(\prelude-ls)
 
 types = require('./types')
 { consume, wait, retrying, in-parallel } = require('./util')
@@ -33,23 +33,34 @@ flash-message = (channel, text, interval = 5) ->
 ################################################################################
 # EVENT MESSAGING
 
+# generates a friendly date string for an event start.
+date-for = (event) ->
+  start = DateTime.fromISO(event.date)
+  pacific = start.setZone('America/Los_Angeles').toFormat('EEEE d MMM, h:mm a ZZZZ')
+  eastern = start.setZone('America/New_York').toFormat('h:mm a ZZZZ')
+  "#pacific (#eastern)"
+
+# creates the embed object that represents an event to discord.
+embed-for = (event) ->
+  rich-embed = new Discord.RichEmbed()
+  rich-embed.setColor(types[event.type].color)
+  rich-embed.setTitle(types[event.type].name)
+
+  rich-embed.addField(\Starts, date-for(event), true)
+  rich-embed.addField(\Commitment, event.commitment, true) if event.commitment?
+  rich-embed.addField(\Participants, event.members |> map((.nick)) |> (.join(', ')))
+
+  if event.overflow.length > 0
+    rich-embed.addField(\Standby, event.overflow |> map((.nick)) |> (.join(', ')))
+
+  rich-embed
+
 # prints all events in global state.
 print-events = (channel) -> consume(print-event(channel), global.state)
 print-event = (channel, event) -->
-  # set up and send the event details.
-  rich-embed = new Discord.RichEmbed()
-  rich-embed.setTitle(types[event.type].name)
-  start = DateTime.fromISO(event.date)
-  eastern = start.setZone('America/New_York').toFormat('EEEE d MMM, h:mm a ZZZZ')
-  pacific = start.setZone('America/Los_Angeles').toFormat('hh:mm a ZZZZ')
-  rich-embed.addField(\Starts, "#eastern (#pacific)", true)
-  rich-embed.addField(\Commitment, event.commitment, true) if event.commitment?
-  rich-embed.addField(\Participants, event.members |> map((.nick)) |> (.join(', ')))
-  rich-embed.setColor(types[event.type].color)
-
   # send the message, return that promise, but simultaneously remember the sent
   # message (so we can edit it later) and set up interaction reactions.
-  (message) <- in-parallel(channel.send(rich-embed))
+  (message) <- in-parallel(channel.send(embed-for(event)))
   reset-reactions(message, '\✅', '\❎')
 
   # and set up reactions.
@@ -60,8 +71,41 @@ print-event = (channel, event) -->
     leave-event(user, event, message) if reaction.emoji.name is '\❎'
 
 join-event = (user, event, message) ->
-leave-event = (user, event, message) ->
+  # first check if the user is already joined. bail if so.
+  return if any((.id is user.id), event.members ++ event.overflow)
 
+  # now add the user to the appropriate bucket depending on event fullness.
+  target = if event.members.length < types[event.type].capacity then event.members else event.overflow
+  target.push({ id: user.id, nick: user.username })
+  global.save-state()
+
+  # now redraw the event, and let the user know they've joined the event.
+  message.edit(embed-for(event))
+  if target is event.members
+    user.send("You have joined the event **#{types[event.type].name}** set for **#{date-for(event)}**. #{types[event.type].automessage}")
+  else
+    user.send("The event **#{types[event.type].name}** at **#{date-for(event)}** __***is full***__, but you are on the standby list. If somebody leaves, I will let you know.")
+
+leave-event = (user, event, message) ->
+  # first check if the user has not actually joined. bail if so.
+  return unless any((.id is user.id), event.members ++ event.overflow)
+
+  # remove the user from overflow if present.
+  event.overflow.splice(idx, 1) if (idx = find-index((.id is user.id), event.overflow))?
+
+  # remove the user from participants if present, and promote an overflow user if necessary.
+  if (idx = find-index((.id is user.id), event.members))?
+    event.members.splice(idx, 1)
+    if event.overflow.length > 0
+      promoted = event.overflow.shift()
+      event.members.push(promoted)
+      (promoted-user) <- client.fetchUser(promoted.id).then
+      promoted-user.send("Congratulations! Someone has left the event **#{types[event.type].name}** and you are now in! Be ready at **#{date-for(event)}**. #{types[event.type].automessage}")
+
+  # save, redraw the event, and let the user know.
+  global.save-state()
+  message.edit(embed-for(event))
+  user.send("You have left the event **#{types[event.type].name}**.")
 
 ################################################################################
 # SPLASH MESSAGING

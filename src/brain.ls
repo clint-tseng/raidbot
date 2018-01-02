@@ -13,6 +13,7 @@ global.save-state = ->
 # log in and wait.
 client.login(config.get(\token))
 <- client.on(\ready)
+global.client = client
 
 # ensure initial channel status.
 channel = get-channel(client)
