@@ -133,8 +133,17 @@ initiate-event = (channel, user) ->
   global.create-tokens[token] = { id: token, expires: DateTime.local().plus({ hours: 6 }), user }
   user.send("To create a new event, follow this link (valid for 6 hours): #{config.get(\baseUrl)}/create/#token")
 
+redraw-lock = \unlocked
 redraw-calendar = (channel) ->
-  nuke(channel).then(-> print-events(channel)).then(-> print-splash(channel)).catch(console.error)
+  if redraw-lock is \locked
+    redraw-lock = \pending
+  else
+    redraw-lock = \locked
+    nuke(channel).then(-> print-events(channel)).then(-> print-splash(channel)).then(->
+      again = (redraw-lock is \pending)
+      redraw-lock = \unlocked
+      redraw-calendar(channel) if again
+    )
 
 
 ################################################################################
