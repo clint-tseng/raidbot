@@ -1,8 +1,9 @@
 { read-file, write-file } = require(\fs)
 config = require(\config)
+{ keys, values, identity } = require(\prelude-ls)
 { debounce } = require(\underscore)
 
-{ get-channel, redraw-calendar, create-event, delete-event } = require('./routines')
+{ get-channel, redraw-calendar, create-event, delete-event, cull-tokens, cull-events } = require('./routines')
 { create-server } = require('./http')
 
 global.client = new (require(\discord.js)).Client()
@@ -24,4 +25,8 @@ redraw-calendar(channel)
 
 # start the http server.
 create-server({ on-create: create-event(channel), on-delete: delete-event(channel) })
+
+# schedule cullings.
+setInterval(cull-tokens, 120_000)
+setInterval(cull-events(channel), 60_000)
 

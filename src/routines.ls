@@ -1,7 +1,7 @@
 config = require(\config)
 { DateTime } = require(\luxon)
 Discord = require(\discord.js)
-{ any, map, find-index, sort-by } = require(\prelude-ls)
+{ any, filter, map, find-index, sort-by } = require(\prelude-ls)
 uuid = require('uuid/v4')
 
 types = require('./types')
@@ -181,8 +181,26 @@ delete-event = (channel, event) -->
   removal-message = "The **#{types[event.type].name}** event you had joined, scheduled for #{date-for(event)}, has been cancelled."
   (event.members ++ event.overflow) |> consume((removed) -> client.fetchUser(removed.id).then((.send(removal-message))))
 
+
+cull-tokens = ->
+  now = DateTime.local()
+  for id, { expires } of global.create-tokens when expires > now
+    delete global[id]
+  null
+
+cull-events = (channel) -> ->
+  # check for culling.
+  line = DateTime.local().plus({ hours: 3 })
+  survivors = global.state |> filter(({ date }) -> DateTime.fromISO(date) > line)
+  return unless survivors.length < global.state.length
+
+  # cull.
+  global.state = survivors
+  global.save-state()
+  redraw-calendar(channel)
+
 ################################################################################
 # EXPORTS
 
-module.exports = { get-channel, nuke, flash-message, print-events, print-splash, redraw-calendar, create-event, delete-event }
+module.exports = { get-channel, nuke, flash-message, print-events, print-splash, redraw-calendar, create-event, delete-event, cull-tokens, cull-events }
 
