@@ -29,7 +29,12 @@ create-server = ({ on-create, on-delete }) ->
     response.status(200).sendFile(path.resolve("#__dirname/../static/creating.html"))
   )
 
-  service.get('/delete/:id', (request, response) ->
+  service.get('/delete/:id/confirm', (request, response) ->
+    return not-found(response) unless (global.state |> find (.id is request.params.id))?
+    response.status(200).sendFile(path.resolve("#__dirname/../static/confirm-delete.html"))
+  )
+
+  service.get('/delete/:id/execute', (request, response) ->
     event = global.state |> find (.id is request.params.id)
     return not-found(response) unless event?
 

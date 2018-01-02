@@ -156,7 +156,7 @@ create-event = (channel, token, join, event) -->
   redraw-calendar(channel)
 
   # and notify the user.
-  create-message = "Your event **#{types[event.type].name}** for **#{date-for(event)}** has been created! If you wish to delete it, use this link: #{config.get(\baseUrl)}/delete/#{event.id}"
+  create-message = "Your event **#{types[event.type].name}** for **#{date-for(event)}** has been created! If you wish to delete it, use this link: #{config.get(\baseUrl)}/delete/#{event.id}/confirm"
   token.user.send(create-message)
 
 delete-event = (channel, event) -->
