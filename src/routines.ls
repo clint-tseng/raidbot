@@ -159,7 +159,18 @@ create-event = (channel, token, join, event) -->
   create-message = "Your event **#{types[event.type].name}** for **#{date-for(event)}** has been created! If you wish to delete it, use this link: #{config.get(\baseUrl)}/delete/#{event.id}"
   token.user.send(create-message)
 
-delete-event = (id) ->
+delete-event = (channel, event) -->
+  # pull the event out from the global list; persist.
+  idx = find-index((.id is event.id), global.state)
+  global.state.splice(idx, 1)
+  global.save-state()
+
+  # redraw the calendar channel.
+  redraw-calendar(channel)
+
+  # and notify all joined users.
+  removal-message = "The **#{types[event.type].name}** event you had joined, scheduled for #{date-for(event)}, has been cancelled."
+  (event.members ++ event.overflow) |> consume((removed) -> client.fetchUser(removed.id).then((.send(removal-message))))
 
 ################################################################################
 # EXPORTS

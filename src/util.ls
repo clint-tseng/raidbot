@@ -1,4 +1,4 @@
-consume = (proc, array) ->
+consume = (proc, array) -->
   | array.length => new Promise((resolve, reject) -> consume-iter(proc, array, resolve, reject))
   | otherwise => Promise.resolve()
 consume-iter = (proc, [head, ...tail], resolve, reject) ->

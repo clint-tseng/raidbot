@@ -1,5 +1,6 @@
 service = require(\express)()
 { urlencoded } = require(\body-parser)
+{ find } = require(\prelude-ls)
 config = require(\config)
 path = require(\path)
 { DateTime } = require(\luxon)
@@ -28,8 +29,12 @@ create-server = ({ on-create, on-delete }) ->
     response.status(200).sendFile(path.resolve("#__dirname/../static/creating.html"))
   )
 
-  service.delete('/delete/:token', (request, response) ->
-    response.status(200).sendFile(path.resolve("#__dirname/../static/delete.html"))
+  service.get('/delete/:id', (request, response) ->
+    event = global.state |> find (.id is request.params.id)
+    return not-found(response) unless event?
+
+    on-delete(event)
+    response.status(200).sendFile(path.resolve("#__dirname/../static/deleting.html"))
   )
 
   service.listen(config.get(\port))
