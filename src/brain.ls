@@ -4,7 +4,7 @@ config = require(\config)
 { get-channel, nuke, print-events, print-splash } = require('./routines')
 client = new (require(\discord.js)).Client()
 
-# data operations (globals; load-state; save-save).
+# data operations (globals; load-state; save-state).
 global.reservation-tokens = {}
 (_, file) <- read-file("#__dirname/../data/events.json")
 global.state = if file? then JSON.parse(file) else []

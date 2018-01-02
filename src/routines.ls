@@ -1,7 +1,7 @@
 config = require(\config)
 { DateTime } = require(\luxon)
 Discord = require(\discord.js)
-{ any, map, find-index } = require(\prelude-ls)
+{ any, map, find-index, sort-by } = require(\prelude-ls)
 
 types = require('./types')
 { consume, wait, retrying, in-parallel } = require('./util')
@@ -56,7 +56,7 @@ embed-for = (event) ->
   rich-embed
 
 # prints all events in global state.
-print-events = (channel) -> consume(print-event(channel), global.state)
+print-events = (channel) -> consume(print-event(channel), global.state |> sort-by((.date)) |> (.reverse()))
 print-event = (channel, event) -->
   # send the message, return that promise, but simultaneously remember the sent
   # message (so we can edit it later) and set up interaction reactions.
