@@ -13,5 +13,7 @@ in-parallel = (promise, f) ->
   promise.then(f)
   promise
 
-module.exports = { consume, wait, retrying, in-parallel }
+or-else = (y, x) --> if x? and x isnt '' then x else y
+
+module.exports = { consume, wait, retrying, in-parallel, or-else }
 

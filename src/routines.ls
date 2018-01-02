@@ -5,7 +5,7 @@ Discord = require(\discord.js)
 uuid = require('uuid/v4')
 
 types = require('./types')
-{ consume, wait, retrying, in-parallel } = require('./util')
+{ consume, wait, retrying, in-parallel, or-else } = require('./util')
 
 
 ################################################################################
@@ -49,7 +49,7 @@ embed-for = (event) ->
 
   rich-embed.addField(\Starts, date-for(event), true)
   rich-embed.addField(\Commitment, "#{event.commitment} hour(s)", true) if event.commitment?
-  rich-embed.addField(\Participants, event.members |> map((.nick)) |> (.join(', ')))
+  rich-embed.addField(\Participants, event.members |> map((.nick)) |> (.join(', ')) |> or-else('(none)'))
 
   if event.overflow.length > 0
     rich-embed.addField(\Standby, event.overflow |> map((.nick)) |> (.join(', ')))
