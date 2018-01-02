@@ -2,5 +2,6 @@
   "nick": "raidbot",
   "token": "Mzk0MDI2Mjg1ODk2MDQwNDQ4.DR-WPg.MN844sO4uq6cH48KjBiwKG_91y4",
   "channel": "394279756528615424",
+  "port": 7272,
   "baseUrl": "http://localhost:7272"
 }

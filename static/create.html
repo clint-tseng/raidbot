@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+  <head>
+    <title>The Guardian Core: Create an Event</title>
+    <style>
+      html {
+        background-color: #666;
+        color: #444;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 62.5%;
+      }
+      form {
+        background-color: #f7f7f7;
+        border-radius: 0 0 0.5em 0.5em;
+        border-top: 4px solid #076a7f;
+        box-shadow: 0 0 6em rgba(0, 0, 0, 0.23), 0 0.3em 0.8em rgba(0, 0, 0, 0.3);
+        display: block;
+        margin: 6em auto 0;
+        padding: 2em;
+        padding-top: 6em;
+        position: relative;
+        width: 42em;
+      }
+      h1 {
+        background-color: #0b9fbf;
+        color: #fff;
+        left: 0;
+        letter-spacing: -0.03em;
+        padding: 0.6em 1em 0.4em;
+        position: absolute;
+        right: 0;
+        top: -0.65em;
+      }
+      label {
+        display: block;
+        padding-bottom: 2.5em;
+        padding-left: 22em;
+        position: relative;
+      }
+      .smash {
+        padding-bottom: 0.5em;
+      }
+      .main {
+        font-size: 1.3em;
+        font-weight: bold;
+        left: 0;
+        letter-spacing: -0.02em;
+        position: absolute;
+        top: 0.2em;
+      }
+      .soft {
+        color: #999;
+        font-size: 0.9em;
+        font-weight: normal;
+      }
+      .hidden {
+        display: block;
+        position: absolute;
+        text-indent: -9999px;
+      }
+      input[type=submit] {
+        display: block;
+        padding-top: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <form method="post">
+      <h1>Create an Event</h1>
+      <label>
+        <div class="main">Event type</div>
+        <select name="type">
+          <option value="raidLeviathan">Raid: Leviathan</option>
+          <option value="raidLeviathanPrestige">Prestige Raid: Leviathan</option>
+          <option value="raidEow">Raid: Eater of Worlds</option>
+          <option value="raidEowPrestige">Prestige Raid: Eater of Worlds</option>
+          <option value="nightfallPrestige">Prestige Nightfall</option>
+          <option value="trials">Trials of the Nine</option>
+        </select>
+      </label>
+      <label class="smash">
+        <div class="main">Start</div>
+        <input type="date" name="date" required="required"/>
+      </label>
+      <label class="smash">
+        <div class="hidden">Start Time</div>
+        <input type="time" name="time" required="required"/>
+      </label>
+      <label>
+        <div class="hidden">Start Timezone</div>
+        <select name="tz">
+          <option value="America/Los_Angeles">Pacific</option>
+          <option value="America/Denver">Mountain</option>
+          <option value="America/Chicago">Central</option>
+          <option value="America/New_York">Eastern</option>
+        </select>
+      </label>
+      <label>
+        <div class="main">Minimum Commitment <span class="soft">(optional)</span></div>
+        <input type="number" name="commitment"/> hour(s)
+      </label>
+      <label>
+        <div class="main">Join this event</div>
+        <input type="checkbox" name="join" value="join" checked="checked"/>
+      </label>
+      <input type="submit"/>
+    </form>
+  </body>
+<html>
+

@@ -1,11 +1,14 @@
 { read-file } = require(\fs)
 config = require(\config)
 { keys, values } = require(\prelude-ls)
-{ get-channel, nuke, print-events, print-splash } = require('./routines')
-client = new (require(\discord.js)).Client()
+
+{ get-channel, redraw-calendar, create-event, delete-event } = require('./routines')
+{ create-server } = require('./http')
+
+global.client = new (require(\discord.js)).Client()
 
 # data operations (globals; load-state; save-state).
-global.reservation-tokens = {}
+global.create-tokens = {}
 (_, file) <- read-file("#__dirname/../data/events.json")
 global.state = if file? then JSON.parse(file) else []
 global.save-state = ->
@@ -13,12 +16,11 @@ global.save-state = ->
 # log in and wait.
 client.login(config.get(\token))
 <- client.on(\ready)
-global.client = client
+channel = get-channel(client)
 
 # ensure initial channel status.
-channel = get-channel(client)
-nuke(channel)
-  .then(-> print-events(channel))
-  .then(-> print-splash(channel))
-  .catch(console.error)
+redraw-calendar(channel)
+
+# start the http server.
+create-server({ on-create: create-event(channel), on-delete: delete-event(channel) })
 

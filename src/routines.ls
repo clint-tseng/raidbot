@@ -48,7 +48,7 @@ embed-for = (event) ->
   rich-embed.setTitle(types[event.type].name)
 
   rich-embed.addField(\Starts, date-for(event), true)
-  rich-embed.addField(\Commitment, event.commitment, true) if event.commitment?
+  rich-embed.addField(\Commitment, "#{event.commitment} hour(s)", true) if event.commitment?
   rich-embed.addField(\Participants, event.members |> map((.nick)) |> (.join(', ')))
 
   if event.overflow.length > 0
@@ -128,14 +128,41 @@ print-splash = (channel) ->
 initiate-event = (channel, user) ->
   flash-message(channel, "Hello, <@#{user.id}>. Check your private messages for further instructions.")
 
-  # create a ticket for this reservation, and send the user the link.
+  # create a reservation token, and send the user the link.
   token = uuid()
-  global.reservation-tokens[uuid] = { expires: DateTime.local().plus({ hours: 6 }), user }
-  user.send("To create a new event, follow this link: #{config.get(\baseUrl)}/create/#token")
+  global.create-tokens[token] = { id: token, expires: DateTime.local().plus({ hours: 6 }), user }
+  user.send("To create a new event, follow this link (valid for 6 hours): #{config.get(\baseUrl)}/create/#token")
 
+redraw-calendar = (channel) ->
+  nuke(channel).then(-> print-events(channel)).then(-> print-splash(channel)).catch(console.error)
+
+
+################################################################################
+# EVENT LIFECYCLE
+
+create-event = (channel, token, join, event) -->
+  # munge the given event slightly to tack on some details.
+  event.id = uuid()
+  event.members = if join is true then [{ id: token.user.id, nick: token.user.username }] else []
+  event.overflow = []
+  delete event.commitment unless event.commitment?
+
+  # update and persist all relevant data.
+  delete global.create-tokens[token.id]
+  global.state.push(event)
+  global.save-state()
+
+  # redraw the calendar channel.
+  redraw-calendar(channel)
+
+  # and notify the user.
+  create-message = "Your event **#{types[event.type].name}** for **#{date-for(event)}** has been created! If you wish to delete it, use this link: #{config.get(\baseUrl)}/delete/#{event.id}"
+  token.user.send(create-message)
+
+delete-event = (id) ->
 
 ################################################################################
 # EXPORTS
 
-module.exports = { get-channel, nuke, flash-message, print-events, print-splash }
+module.exports = { get-channel, nuke, flash-message, print-events, print-splash, redraw-calendar, create-event, delete-event }
 
