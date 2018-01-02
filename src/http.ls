@@ -5,7 +5,6 @@ path = require(\path)
 { DateTime } = require(\luxon)
 
 not-found = (response) -> response.status(404).send('there is nothing here.')
-squelch = (x) -> if !x? or x is '' then undefined else x
 
 create-server = ({ on-create, on-delete }) ->
   service.use(urlencoded({ extended: true }))
@@ -24,7 +23,7 @@ create-server = ({ on-create, on-delete }) ->
     on-create(token, (data.join is \join), {
       type: data.type
       date: DateTime.fromISO("#{data.date}T#{data.time}", { zone: data.tz }).setZone(\UTC).toISO()
-      commitment: squelch(data.commitment)
+      commitment: data.commitment
     })
     response.status(200).sendFile(path.resolve("#__dirname/../static/creating.html"))
   )

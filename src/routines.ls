@@ -145,7 +145,7 @@ create-event = (channel, token, join, event) -->
   event.id = uuid()
   event.members = if join is true then [{ id: token.user.id, nick: token.user.username }] else []
   event.overflow = []
-  delete event.commitment unless event.commitment?
+  delete event.commitment unless event.commitment? and event.commitment isnt ''
 
   # update and persist all relevant data.
   delete global.create-tokens[token.id]
