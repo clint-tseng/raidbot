@@ -2,6 +2,7 @@ config = require(\config)
 { DateTime } = require(\luxon)
 Discord = require(\discord.js)
 { any, map, find-index, sort-by } = require(\prelude-ls)
+uuid = require('uuid/v4')
 
 types = require('./types')
 { consume, wait, retrying, in-parallel } = require('./util')
@@ -126,7 +127,11 @@ print-splash = (channel) ->
 # sends out the relevant messages when a new event is requested.
 initiate-event = (channel, user) ->
   flash-message(channel, "Hello, <@#{user.id}>. Check your private messages for further instructions.")
-  user.send('testing testing')
+
+  # create a ticket for this reservation, and send the user the link.
+  token = uuid()
+  global.reservation-tokens[uuid] = { expires: DateTime.local().plus({ hours: 6 }), user }
+  user.send("To create a new event, follow this link: #{config.get(\baseUrl)}/create/#token")
 
 
 ################################################################################
