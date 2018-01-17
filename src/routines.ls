@@ -115,7 +115,7 @@ leave-event = (user, event, message) ->
 # SPLASH MESSAGING
 
 # prints a basic set of instructions.
-splash-message = 'Welcome to the calendar! The soonest events are at the bottom, and later ones are further up. Click on :white_check_mark: to join or :negative_squared_cross_mark: to leave an event, or :star2: below to create a new one.'
+splash-message = 'Welcome to the calendar! There are no commands to learn, all scheduled events are already here. The soonest events are at the bottom, and later ones are further up. Click on :white_check_mark: to join or :negative_squared_cross_mark: to leave an event, or :star2: below to create a new one.'
 print-splash = (channel) ->
   (message) <- channel.send(splash-message).then()
   reset-reactions(message, '\🌟')
