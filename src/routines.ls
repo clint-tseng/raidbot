@@ -54,6 +54,9 @@ embed-for = (event) ->
   if event.overflow.length > 0
     rich-embed.addField(\Standby, event.overflow |> map((.nick)) |> (.join(', ')))
 
+  if event.notes?
+    rich-embed.addField(\Notes, event.notes)
+
   rich-embed
 
 # prints all events in global state.
@@ -155,6 +158,7 @@ create-event = (channel, token, join, event) -->
   event.members = if join is true then [{ id: token.user.id, nick: token.user.username }] else []
   event.overflow = []
   delete event.commitment unless event.commitment? and event.commitment isnt ''
+  delete event.notes unless event.notes? and event.notes isnt ''
 
   # update and persist all relevant data.
   delete global.create-tokens[token.id]

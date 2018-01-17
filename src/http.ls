@@ -25,6 +25,7 @@ create-server = ({ on-create, on-delete }) ->
       type: data.type
       date: DateTime.fromISO("#{data.date}T#{data.time}", { zone: data.tz }).setZone(\UTC).toISO()
       commitment: data.commitment
+      notes: data.notes
     })
     response.status(200).sendFile(path.resolve("#__dirname/../static/creating.html"))
   )
