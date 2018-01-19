@@ -37,8 +37,8 @@ flash-message = (channel, text, interval = 5) ->
 # generates a friendly date string for an event start.
 date-for = (event) ->
   start = DateTime.fromISO(event.date)
-  pacific = start.setZone('America/Los_Angeles').toFormat('EEEE d MMM, h:mm a ZZZZ')
-  eastern = start.setZone('America/New_York').toFormat('h:mm a ZZZZ')
+  pacific = start.setZone('America/Los_Angeles').setLocale(\en).toFormat('EEEE d MMM, h:mm a ZZZZ')
+  eastern = start.setZone('America/New_York').setLocale(\en).toFormat('h:mm a ZZZZ')
   "#pacific (#eastern)"
 
 # creates the embed object that represents an event to discord.
